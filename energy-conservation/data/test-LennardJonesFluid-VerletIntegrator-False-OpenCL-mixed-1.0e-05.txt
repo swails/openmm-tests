@@ -1,0 +1,5 @@
+LennardJonesFluid : integrator VerletIntegrator | switch False | platform OpenCL | precision mixed | constraint tolerance 1.0e-05
+   0.125               0.00000055               0.00162367
+   0.250               0.00000062              -0.00098920
+   0.500               0.00000065               0.00088489
+   1.000               0.00000055              -0.00199456

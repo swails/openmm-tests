@@ -1,0 +1,5 @@
+HarmonicOscillator : integrator VelocityVerletIntegrator | switch False | platform OpenCL | precision single | constraint tolerance 1.0e-10
+   0.125               0.00000191              -0.01707999
+   0.250               0.00000660              -0.00168394
+   0.500               0.00002551              -0.01563661
+   1.000               0.00010143              -0.03271659

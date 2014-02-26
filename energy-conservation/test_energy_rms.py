@@ -129,7 +129,7 @@ def select_options(options_list, index):
 #=============================================================================================
 
 # Sets of parameters to regress over.
-systems_to_try = ['LennardJonesFluid', 'WaterBox'] # testsystems to try
+systems_to_try = ['HarmonicOscillator', 'LennardJonesFluid', 'WaterBox'] # testsystems to try
 integrators_to_try = ['VerletIntegrator', 'VelocityVerletIntegrator'] # testsystems to try
 switching_to_try = [False, True] # switching function flags
 platform_names_to_try = ['CUDA', 'OpenCL', 'CPU', 'Reference'] # platform names to try
@@ -137,24 +137,23 @@ precision_models_to_try = ['single', 'mixed', 'double'] # precision models to tr
 constraint_tolerances_to_try = [1.0e-10, 1.0e-5] # constraint tolerances to try (for systems with constraints)
 
 # Timesteps to try for each parameter set.
-timesteps_to_try = units.Quantity([0.125, 0.250, 0.5, 1.0, 2.0], units.femtoseconds) # MD timesteps to test for each system
+timesteps_to_try = units.Quantity([0.125, 0.250, 0.5, 1.0], units.femtoseconds) # MD timesteps to test for each system
 ntimesteps_to_try = len(timesteps_to_try)
 
 # Number of GPUs.
 ngpus = 4
 
 # Other data
-simulation_length = 2.0 * units.picoseconds # length of simulation segment
-record_interval = 20.0 * units.femtoseconds # time between recording data
+simulation_length = 100.0 * units.femtoseconds # length of simulation segment
+record_interval = 1.0 * units.femtoseconds # time between recording data
 nrecords = int(simulation_length / record_interval)
 
 temperature = 298.0 * units.kelvin
 pressure = 1.0 * units.atmosphere # pressure for equilibration
 
-ghmc_nsteps = 10000 # number of steps to generate new uncorrelated sample with GHMC
+ghmc_nsteps = 1000 # number of steps to generate new uncorrelated sample with GHMC
 ghmc_timestep = 1.0 * units.femtoseconds
-nsamples = 10 # number of samples to generate
-nequil = 100 # number of NPT equilibration iterations
+nequil = 1000 # number of NPT equilibration iterations
 
 # DEBUG
 #systems_to_try = ['LennardJonesFluid']
@@ -162,7 +161,6 @@ nequil = 100 # number of NPT equilibration iterations
 #gammas_to_try = units.Quantity([0.01], units.picoseconds**-1) # collision rates
 #timestep_correction_flags_to_try = [False]
 #nequil = 1
-nsamples = 1
 #precision_models_to_try = ['double'] # precision models to try
 
 verbose = True
@@ -236,7 +234,10 @@ for index in range(rank, nsystems, size):
         print "Creating system %s..." % system_name
         import testsystems
         constructor = getattr(testsystems, system_name)
-        testsystem = constructor(switch=switching_flag)
+        if system_name in ['WaterBox', 'LennardJonesFluid']:
+            testsystem = constructor()
+        else:
+            testsystem = constructor(switch=switching_flag)
         [system, positions] = [testsystem.system, testsystem.positions]
         ndof = 3*system.getNumParticles() - system.getNumConstraints()
         nparticles = system.getNumParticles()        
@@ -441,7 +442,7 @@ for index in range(rank, noptionsets, size):
         ncfile.variables['rms_total_energy'][timestep_index] = rms_total_energy
         ncfile.sync()
 
-        output = "timestep %8.3f fs | RMS total energy %24.8f kT | drift %24.8f kT" % (timestep / units.femtoseconds, rms_total_energy, total_energy_drift)
+        output = "timestep %8.3f fs | RMS total energy %20.8e kT | drift %20.8e kT" % (timestep / units.femtoseconds, rms_total_energy, total_energy_drift)
         print output
         outfile.write('%8.3f %24.8f %24.8f\n' % (timestep/units.femtoseconds, rms_total_energy, total_energy_drift))
         

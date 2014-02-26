@@ -1,0 +1,5 @@
+LennardJonesFluid : integrator VerletIntegrator | switch True | platform CUDA | precision double | constraint tolerance 1.0e-05
+   0.125               0.00000042               0.01236770
+   0.250               0.00000170               0.04950143
+   0.500               0.00000680               0.19825260
+   1.000               0.00002723               0.79501588
