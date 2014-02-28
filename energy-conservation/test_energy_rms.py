@@ -129,7 +129,7 @@ def select_options(options_list, index):
 #=============================================================================================
 
 # Sets of parameters to regress over.
-systems_to_try = ['HarmonicOscillator', 'LennardJonesFluid', 'WaterBox'] # testsystems to try
+systems_to_try = ['Diatom', 'DischargedWaterBox', 'DischargedWaterBoxHsites', 'SodiumChlorideCrystal', 'HarmonicOscillator', 'LennardJonesCluster', 'LennardJonesFluid', 'WaterBox'] # testsystems to try
 integrators_to_try = ['VerletIntegrator', 'VelocityVerletIntegrator'] # testsystems to try
 switching_to_try = [False, True] # switching function flags
 platform_names_to_try = ['CUDA', 'OpenCL', 'CPU', 'Reference'] # platform names to try
@@ -234,7 +234,7 @@ for index in range(rank, nsystems, size):
         print "Creating system %s..." % system_name
         import testsystems
         constructor = getattr(testsystems, system_name)
-        if system_name in ['WaterBox', 'LennardJonesFluid']:
+        if system_name in ['HarmonicOscillator']:
             testsystem = constructor()
         else:
             testsystem = constructor(switch=switching_flag)

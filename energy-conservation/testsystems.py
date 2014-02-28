@@ -727,6 +727,12 @@ class SodiumChlorideCrystal(TestSystem):
 
     Each atom is represented by a charged Lennard-Jones sphere in an Ewald lattice.
 
+    switch : bool, optional, default=True
+        flag to use nonbonded switching function
+    switch_width : simtk.unit.Quantity with units compatible with angstroms, optional, default=0.2*units.angstroms
+        switching function is turned on at cutoff - switch_width
+    dispersion_correction : bool, optional, default=True
+        if True, will use analytical dispersion correction (if not using switching function)
 
     Notes
     -----
@@ -745,7 +751,7 @@ class SodiumChlorideCrystal(TestSystem):
     >>> crystal = SodiumChlorideCrystal()
     >>> system, positions = crystal.system, crystal.positions
     """
-    def __init__(self):
+    def __init__(self, switch=True, switch_width=0.2*units.angstroms, dispersion_correction=True):
         # Set default parameters (from Tinker).
         mass_Na     = 22.990 * units.amu
         mass_Cl     = 35.453 * units.amu
@@ -775,7 +781,12 @@ class SodiumChlorideCrystal(TestSystem):
         # Set cutoff to be less than one half the box length.
         cutoff = box_size / 2.0 * 0.99
         force.setCutoffDistance(cutoff)
-        
+
+        # Set treatment.
+        nb.setUseDispersionCorrection(dispersion_correction)
+        nb.setUseSwitchingFunction(switch)
+        nb.setSwitchingDistance(cutoff-switch_width)
+
         # Allocate storage for positions.
         natoms = 2
         positions = units.Quantity(np.zeros([natoms,3], np.float32), units.angstroms)
@@ -817,7 +828,10 @@ class LennardJonesCluster(TestSystem):
         number of particles in the z direction        
     K : simtk.unit.Quantity, optional, default=1.0 * units.kilojoules_per_mole/units.nanometer**2
         harmonic restraining potential
-
+    switch : bool, optional, default=True
+        flag to use nonbonded switching function
+    switch_width : simtk.unit.Quantity with units compatible with angstroms, optional, default=0.5*units.angstroms
+        switching function is turned on at cutoff - switch_width
 
     Examples
     --------
@@ -832,7 +846,7 @@ class LennardJonesCluster(TestSystem):
     >>> cluster = LennardJonesCluster(nx=10, ny=10, nz=10)
     >>> system, positions = cluster.system, cluster.positions
     """
-    def __init__(self, nx=3, ny=3, nz=3, K=1.0 * units.kilojoules_per_mole/units.nanometer**2):        
+    def __init__(self, nx=3, ny=3, nz=3, K=1.0 * units.kilojoules_per_mole/units.nanometer**2, switch=True, switch_width=0.5*units.angstroms):        
 
         # Default parameters
         mass_Ar     = 39.9 * units.amu
@@ -853,6 +867,8 @@ class LennardJonesCluster(TestSystem):
         # Create a NonbondedForce object with no cutoff.
         nb = mm.NonbondedForce()
         nb.setNonbondedMethod(mm.NonbondedForce.NoCutoff)
+        nb.setUseSwitchingFunction(switch)
+        nb.setSwitchingDistance(cutoff-switch_width)
 
         positions = units.Quantity(np.zeros([natoms,3],np.float32), units.angstrom)
 
@@ -1555,6 +1571,124 @@ class FiveSiteWaterBox(WaterBox):
        
        """
        super(FiveSiteWaterBox, self).__init__(box_edge=box_edge, cutoff=cutoff, model='tip5p')
+
+class DischargedWaterBox(WaterBox):
+   """
+   Create a water box test system with zeroed charges.
+
+   Examples
+   --------
+   
+   Create a default waterbox with zeroed charges
+
+   >>> waterbox = DischargedWaterBox()
+
+   Control the cutoff.
+   
+   >>> waterbox = DischargedWaterBox(box_edge=3.0*units.nanometers, cutoff=1.0*units.nanometers)
+
+   """
+
+   def __init__(self, box_edge=2.5*units.nanometers, cutoff=0.9*units.nanometers, model='tip3p', switch=True, switch_width=0.5*units.angstroms):
+       """
+       Create a water box test systemm using a four-site water model (TIP4P-Ew).
+       
+       Parameters
+       ----------
+       
+       box_edge : simtk.unit.Quantity with units compatible with nanometers, optional, default = 2.5 nm
+          Edge length for cubic box [should be greater than 2*cutoff]
+       cutoff : simtk.unit.Quantity with units compatible with nanometers, optional, default = 0.9 nm
+          Nonbonded cutoff
+       
+       Examples
+       --------
+       
+       Create a default waterbox.
+       
+       >>> waterbox = DischargedWaterBox()
+       >>> [system, positions] = [waterbox.system, waterbox.positions]
+       
+       Control the cutoff.
+       
+       >>> waterbox = DischargedWaterBox(box_edge=3.0*units.nanometers, cutoff=1.0*units.nanometers)
+       
+       """
+       super(DischargedWaterBox, self).__init__(box_edge=box_edge, cutoff=cutoff, model=model, switch=switch, switch_width=switch_width)
+
+       # Zero charges.
+       system = self.system
+       forces = { system.getForce(index).__class__.__name__ : system.getForce(index) for index in range(system.getNumForces()) }
+       force = forces['NonbondedForce']
+       for index in range(force.getNumParticles()):
+           [charge, sigma, epsilon] = force.getParticleParameters(index)
+           force.setParticleParameters(index, 0*charge, sigma, epsilon)
+       for index in range(force.getNumExceptions()):
+           [particle1, particle2, chargeProd, sigma, epsilon] = force.getExceptionParameters(index)
+           force.setExceptionParameters(index, particle1, particle2, 0*chargeProd, sigma, epsilon)
+           
+       return
+
+class DischargedWaterBoxHsites(WaterBox):
+   """
+   Create a water box test system with zeroed charges and Lennard-Jones sites on hydrogens.
+
+   Examples
+   --------
+   
+   Create a default waterbox with zeroed charges
+
+   >>> waterbox = DischargedWaterBox()
+
+   Control the cutoff.
+   
+   >>> waterbox = DischargedWaterBox(box_edge=3.0*units.nanometers, cutoff=1.0*units.nanometers)
+
+   """
+
+   def __init__(self, box_edge=2.5*units.nanometers, cutoff=0.9*units.nanometers, model='tip3p', switch=True, switch_width=0.5*units.angstroms):
+       """
+       Create a water box test systemm using a four-site water model (TIP4P-Ew).
+       
+       Parameters
+       ----------
+       
+       box_edge : simtk.unit.Quantity with units compatible with nanometers, optional, default = 2.5 nm
+          Edge length for cubic box [should be greater than 2*cutoff]
+       cutoff : simtk.unit.Quantity with units compatible with nanometers, optional, default = 0.9 nm
+          Nonbonded cutoff
+       
+       Examples
+       --------
+       
+       Create a default waterbox.
+       
+       >>> waterbox = DischargedWaterBox()
+       >>> [system, positions] = [waterbox.system, waterbox.positions]
+       
+       Control the cutoff.
+       
+       >>> waterbox = DischargedWaterBox(box_edge=3.0*units.nanometers, cutoff=1.0*units.nanometers)
+       
+       """
+       super(DischargedWaterBox, self).__init__(box_edge=box_edge, cutoff=cutoff, model=model, switch=switch, switch_width=switch_width)
+
+       # Zero charges.
+       system = self.system
+       forces = { system.getForce(index).__class__.__name__ : system.getForce(index) for index in range(system.getNumForces()) }
+       force = forces['NonbondedForce']
+       for index in range(force.getNumParticles()):
+           [charge, sigma, epsilon] = force.getParticleParameters(index)
+           charge *= 0
+           if epsilon == 0.0 * kilojoules_per_mole:
+               epsilon = 0.1 * kilojoules_per_mole
+           force.setParticleParameters(index, charge, sigma, epsilon)
+       for index in range(force.getNumExceptions()):
+           [particle1, particle2, chargeProd, sigma, epsilon] = force.getExceptionParameters(index)
+           chargeProd *= 0
+           force.setExceptionParameters(index, particle1, particle2, chargeProd, sigma, epsilon)
+           
+       return
 
 #=============================================================================================
 # Alanine dipeptide in vacuum.
