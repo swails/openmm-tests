@@ -234,10 +234,11 @@ for index in range(rank, nsystems, size):
         print "Creating system %s..." % system_name
         import testsystems
         constructor = getattr(testsystems, system_name)
-        if system_name in ['HarmonicOscillator']:
-            testsystem = constructor()
-        else:
+        import inspect
+        if 'switch' in inspect.getargspec(constructor.__init__).args:
             testsystem = constructor(switch=switching_flag)
+        else:
+            testsystem = constructor()
         [system, positions] = [testsystem.system, testsystem.positions]
         ndof = 3*system.getNumParticles() - system.getNumConstraints()
         nparticles = system.getNumParticles()        
@@ -248,7 +249,7 @@ for index in range(rank, nsystems, size):
         import copy
         system_with_barostat = copy.deepcopy(system)
         barostat = openmm.MonteCarloBarostat(pressure, temperature)
-        system_with_barostat.addForce(barostat)
+        #system_with_barostat.addForce(barostat)
         ghmc_integrator = GHMCIntegrator(timestep=ghmc_timestep, temperature=temperature)
         ghmc_global_variables = { ghmc_integrator.getGlobalVariableName(index) : index for index in range(ghmc_integrator.getNumGlobalVariables()) }
 

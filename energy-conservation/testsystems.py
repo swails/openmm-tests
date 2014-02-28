@@ -783,9 +783,9 @@ class SodiumChlorideCrystal(TestSystem):
         force.setCutoffDistance(cutoff)
 
         # Set treatment.
-        nb.setUseDispersionCorrection(dispersion_correction)
-        nb.setUseSwitchingFunction(switch)
-        nb.setSwitchingDistance(cutoff-switch_width)
+        force.setUseDispersionCorrection(dispersion_correction)
+        force.setUseSwitchingFunction(switch)
+        force.setSwitchingDistance(cutoff-switch_width)
 
         # Allocate storage for positions.
         natoms = 2
@@ -828,10 +828,6 @@ class LennardJonesCluster(TestSystem):
         number of particles in the z direction        
     K : simtk.unit.Quantity, optional, default=1.0 * units.kilojoules_per_mole/units.nanometer**2
         harmonic restraining potential
-    switch : bool, optional, default=True
-        flag to use nonbonded switching function
-    switch_width : simtk.unit.Quantity with units compatible with angstroms, optional, default=0.5*units.angstroms
-        switching function is turned on at cutoff - switch_width
 
     Examples
     --------
@@ -846,7 +842,7 @@ class LennardJonesCluster(TestSystem):
     >>> cluster = LennardJonesCluster(nx=10, ny=10, nz=10)
     >>> system, positions = cluster.system, cluster.positions
     """
-    def __init__(self, nx=3, ny=3, nz=3, K=1.0 * units.kilojoules_per_mole/units.nanometer**2, switch=True, switch_width=0.5*units.angstroms):        
+    def __init__(self, nx=3, ny=3, nz=3, K=1.0 * units.kilojoules_per_mole/units.nanometer**2):        
 
         # Default parameters
         mass_Ar     = 39.9 * units.amu
@@ -867,8 +863,6 @@ class LennardJonesCluster(TestSystem):
         # Create a NonbondedForce object with no cutoff.
         nb = mm.NonbondedForce()
         nb.setNonbondedMethod(mm.NonbondedForce.NoCutoff)
-        nb.setUseSwitchingFunction(switch)
-        nb.setSwitchingDistance(cutoff-switch_width)
 
         positions = units.Quantity(np.zeros([natoms,3],np.float32), units.angstrom)
 
@@ -1671,7 +1665,7 @@ class DischargedWaterBoxHsites(WaterBox):
        >>> waterbox = DischargedWaterBox(box_edge=3.0*units.nanometers, cutoff=1.0*units.nanometers)
        
        """
-       super(DischargedWaterBox, self).__init__(box_edge=box_edge, cutoff=cutoff, model=model, switch=switch, switch_width=switch_width)
+       super(DischargedWaterBoxHsites, self).__init__(box_edge=box_edge, cutoff=cutoff, model=model, switch=switch, switch_width=switch_width)
 
        # Zero charges.
        system = self.system
@@ -1680,8 +1674,8 @@ class DischargedWaterBoxHsites(WaterBox):
        for index in range(force.getNumParticles()):
            [charge, sigma, epsilon] = force.getParticleParameters(index)
            charge *= 0
-           if epsilon == 0.0 * kilojoules_per_mole:
-               epsilon = 0.1 * kilojoules_per_mole
+           if epsilon == 0.0 * units.kilojoules_per_mole:
+               epsilon = 0.1 * units.kilojoules_per_mole
            force.setParticleParameters(index, charge, sigma, epsilon)
        for index in range(force.getNumExceptions()):
            [particle1, particle2, chargeProd, sigma, epsilon] = force.getExceptionParameters(index)

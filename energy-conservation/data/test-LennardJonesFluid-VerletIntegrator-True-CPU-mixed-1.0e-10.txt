@@ -1,5 +1,0 @@
-LennardJonesFluid : integrator VerletIntegrator | switch True | platform CPU | precision mixed | constraint tolerance 1.0e-10
-   0.125               0.00000790              -0.05611120
-   0.250               0.00000758               0.25605667
-   0.500               0.00001010               0.40381968
-   1.000               0.00002709               0.86661564

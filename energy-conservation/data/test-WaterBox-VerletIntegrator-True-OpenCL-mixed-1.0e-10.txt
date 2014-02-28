@@ -1,5 +1,0 @@
-WaterBox : integrator VerletIntegrator | switch True | platform OpenCL | precision mixed | constraint tolerance 1.0e-10
-   0.125               0.03122691             927.72365976
-   0.250               0.02807645             811.94569195
-   0.500               0.04173946            1373.67370416
-   1.000               0.06485126             789.35513945

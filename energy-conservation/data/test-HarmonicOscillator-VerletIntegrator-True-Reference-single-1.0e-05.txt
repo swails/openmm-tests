@@ -1,5 +1,0 @@
-HarmonicOscillator : integrator VerletIntegrator | switch True | platform Reference | precision single | constraint tolerance 1.0e-05
-   0.125               0.00000399              -0.00666392
-   0.250               0.00001600              -0.02670926
-   0.500               0.00006432              -0.10728837
-   1.000               0.00025986              -0.43313710
