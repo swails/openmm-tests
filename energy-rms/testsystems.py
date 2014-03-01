@@ -557,6 +557,8 @@ class DiatomicFluid(TestSystem):
         particle Lennard-Jones sigma
     charge : simtk.unit.Quantity, optional, default=0.0 * units.elementary_charge
         charge to place on atomic centers to create a dipole
+    cutoff : simtk.unit.Quantity, optional, default=None
+        if specified, the specified cutoff will be used; otherwise, half the box width will be used
     switch : bool, optional, default=True
         flag to use nonbonded switching function
     switch_width : simtk.unit.Quantity with units compatible with angstroms, optional, default=0.2*units.angstroms
@@ -614,7 +616,7 @@ class DiatomicFluid(TestSystem):
         charge=0.0 * units.elementary_charge,
         switch=True,
         switch_width=0.5*units.angstroms,
-        cutoff=9.0*units.angstroms,
+        cutoff=None,
         constraint=False,
         dispersion_correction=True,
         nx=6, ny=6, nz=6):
@@ -641,13 +643,8 @@ class DiatomicFluid(TestSystem):
                 force.addBond(2*molecule_index+0, 2*molecule_index+1, r0, K)
             system.addForce(force)
 
-        # Set up periodic nonbonded interactions with a cutoff.
+        # Set up nonbonded interactions.
         nb = mm.NonbondedForce()
-        nb.setNonbondedMethod(mm.NonbondedForce.PME)
-        nb.setCutoffDistance(cutoff)
-        nb.setUseDispersionCorrection(dispersion_correction)
-        nb.setUseSwitchingFunction(switch)
-        nb.setSwitchingDistance(cutoff-switch_width)
             
         positions = units.Quantity(np.zeros([natoms,3],np.float32), units.angstrom)
 
@@ -696,11 +693,23 @@ class DiatomicFluid(TestSystem):
         # Add exceptions.
         for molecule_index in range(nmolecules):
             nb.addException(2*molecule_index+0, 2*molecule_index+1, charge*charge, sigma, epsilon*0.0)
+
+        system.addForce(nb)
                     
         # Set periodic box vectors.
         x = maxX+2*sigma*scaleStepSizeX
         y = maxY+2*sigma*scaleStepSizeY
         z = maxZ+2*sigma*scaleStepSizeZ
+
+        if not cutoff:
+            min_width = min(maxX, maxY, maxZ)
+            cutoff = min_width / 2.0 - 0.01 * units.angstroms
+
+        nb.setNonbondedMethod(mm.NonbondedForce.PME)
+        nb.setUseDispersionCorrection(dispersion_correction)
+        nb.setUseSwitchingFunction(switch)
+        nb.setCutoffDistance(cutoff)
+        nb.setSwitchingDistance(cutoff-switch_width)
 
         a = units.Quantity((x,                0*units.angstrom, 0*units.angstrom))
         b = units.Quantity((0*units.angstrom,                y, 0*units.angstrom))
@@ -1661,9 +1670,13 @@ class WaterBox(TestSystem):
 
    >>> waterbox = WaterBox(model='tip4pew')
 
+   Don't use constraints.
+
+   >>> waterbox = WaterBox(constrained=False)
+
    """
 
-   def __init__(self, box_edge=2.5*units.nanometers, cutoff=0.9*units.nanometers, model='tip3p', switch=True, switch_width=0.5*units.angstroms):
+   def __init__(self, box_edge=2.5*units.nanometers, cutoff=0.9*units.nanometers, model='tip3p', switch=True, switch_width=0.5*units.angstroms, constrained=True):
        """
        Create a water box test system.
        
@@ -1680,6 +1693,8 @@ class WaterBox(TestSystem):
           Turns the Lennard-Jones switching function on or off.
        switch_width : simtk.unit.Quantity with units compatible with nanometers, optional, default = 0.5 A
           Sets the width of the switch function for Lennard-Jones.
+       constrained : bool, optional, default=True
+          Sets whether bonds should be constrained or flexible.
        
        Examples
        --------
@@ -1741,7 +1756,7 @@ class WaterBox(TestSystem):
        # Create OpenMM System.
        nonbondedMethod = app.CutoffPeriodic
        constraints = app.HBonds
-       system = ff.createSystem(newtop, nonbondedMethod=nonbondedMethod, nonbondedCutoff=cutoff, constraints=constraints, rigidWater=True, removeCMMotion=False)
+       system = ff.createSystem(newtop, nonbondedMethod=nonbondedMethod, nonbondedCutoff=cutoff, constraints=constraints, rigidWater=constrained, removeCMMotion=False)
 
        # Turn on switching function.
        forces = { system.getForce(index).__class__.__name__ : system.getForce(index) for index in range(system.getNumForces()) }
@@ -1749,6 +1764,40 @@ class WaterBox(TestSystem):
        forces['NonbondedForce'].setSwitchingDistance(cutoff - switch_width)
        
        self.system, self.positions = system, positions
+
+class FlexibleWaterBox(WaterBox):
+   """
+   Create a flexible water box (TIP3P).
+
+   Examples
+   --------
+   
+   >>> waterbox = FlexibleWaterBox()
+
+   """
+
+   def __init__(self, *args, **kwargs):
+       """
+       Create a water box test systemm using a four-site water model (TIP4P-Ew).
+       
+       Parameters
+       ----------
+       
+       box_edge : simtk.unit.Quantity with units compatible with nanometers, optional, default = 2.5 nm
+          Edge length for cubic box [should be greater than 2*cutoff]
+       cutoff : simtk.unit.Quantity with units compatible with nanometers, optional, default = 0.9 nm
+          Nonbonded cutoff
+       
+       Examples
+       --------
+       
+       Create a default waterbox.
+       
+       >>> waterbox = FlexibleWaterBox()
+       >>> [system, positions] = [waterbox.system, waterbox.positions]
+       
+       """
+       super(FlexibleWaterBox, self).__init__(model='tip4pew', constrained=False, *args, **kwargs)
 
 class FourSiteWaterBox(WaterBox):
    """
@@ -2433,3 +2482,12 @@ class AMOEBAProteinBox(TestSystem):
         positions = pdbfile.getPositions()
         
         self.system, self.positions = system, positions
+
+#
+# MAIN
+#
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+

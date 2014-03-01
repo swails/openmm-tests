@@ -129,7 +129,7 @@ def select_options(options_list, index):
 #=============================================================================================
 
 # Sets of parameters to regress over.
-systems_to_try = ['UnconstrainedDiatomicFluid', 'ConstrainedDiatomicFluid', 'UnconstrainedDipolarFluid', 'ConstrainedDipolarFluid', 'Diatom', 'DischargedWaterBox', 'DischargedWaterBoxHsites', 'SodiumChlorideCrystal', 'HarmonicOscillator', 'LennardJonesCluster', 'LennardJonesFluid', 'WaterBox'] # testsystems to try
+systems_to_try = ['UnconstrainedDiatomicFluid', 'ConstrainedDiatomicFluid', 'UnconstrainedDipolarFluid', 'ConstrainedDipolarFluid', 'Diatom', 'DischargedWaterBox', 'DischargedWaterBoxHsites', 'SodiumChlorideCrystal', 'HarmonicOscillator', 'LennardJonesCluster', 'LennardJonesFluid', 'WaterBox', 'FlexibleWaterBox', 'FourSiteWaterBox'] # testsystems to try
 integrators_to_try = ['VerletIntegrator', 'VelocityVerletIntegrator'] # testsystems to try
 switching_to_try = [False, True] # switching function flags
 platform_names_to_try = ['CUDA', 'OpenCL', 'CPU', 'Reference'] # platform names to try
@@ -453,7 +453,7 @@ for index in range(rank, noptionsets, size):
         last_rms_total_energy = rms_total_energy
 
         if (total_energy_drift > 1.0):
-            outfile.write('***')
+            outfile.write('      ***')
 
         outfile.write('\n')
         
