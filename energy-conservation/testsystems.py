@@ -611,6 +611,7 @@ class DiatomicFluid(TestSystem):
         m2=14.01 * units.amu,
         epsilon=0.1700 * units.kilocalories_per_mole, 
         sigma=1.8240 * units.angstroms,
+        charge=0.0 * units.elementary_charge,
         switch=True,
         switch_width=0.5*units.angstroms,
         cutoff=9.0*units.angstroms,
@@ -638,7 +639,7 @@ class DiatomicFluid(TestSystem):
             force = mm.HarmonicBondForce()
             for molecule_index in range(nmolecules):
                 force.addBond(2*molecule_index+0, 2*molecule_index+1, r0, K)
-                system.addForce(force)
+            system.addForce(force)
 
         # Set up periodic nonbonded interactions with a cutoff.
         nb = mm.NonbondedForce()
@@ -655,8 +656,8 @@ class DiatomicFluid(TestSystem):
         maxZ = 0.0 * units.angstrom
 
         dx = sigma/2
-        dy = 0
-        dz = 0
+        dy = 0 * sigma
+        dz = 0 * sigma
 
         scaleStepSizeX = 1.0
         scaleStepSizeY = 1.0
@@ -708,6 +709,10 @@ class DiatomicFluid(TestSystem):
 
         # Store number of degrees of freedom.
         self.ndof = 3*natoms - nmolecules*constraint
+
+        # Store system and positions.
+        self._system = system
+        self._positions = positions
 
     def get_potential_expectation(self, state):
         """Return the expectation of the potential energy, computed analytically or numerically.
