@@ -4,4 +4,4 @@ openmm-tests
 Miscellaneous tests for OpenMM
 
 ## Manifest
-* `energy-conservation/` - scripts to evaluate energy conservation
+* `energy-rms/` - scripts to evaluate whether RMS total energy follows expected quadratic dependence on timestep
