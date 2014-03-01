@@ -531,6 +531,273 @@ class Diatom(TestSystem):
         """
 
         return (self.ndof/2.) * kB * state.temperature
+
+#=============================================================================================
+# Diatomic fluid
+#=============================================================================================
+
+class DiatomicFluid(TestSystem):
+    """Create a diatomic fluid.
+
+    Parameters
+    ----------
+    K : simtk.unit.Quantity, optional, default=290.1 * units.kilocalories_per_mole / units.angstrom**2
+        harmonic bond potential.  default is GAFF c-c bond
+    r0 : simtk.unit.Quantity, optional, default=1.550 * units.amu
+        bond length.  Default is Amber GAFF c-c bond.
+    constraint : bool, default=False
+        if True, the bond length will be constrained
+    m1 : simtk.unit.Quantity, optional, default=12.01 * units.amu
+        particle1 mass
+    m2 : simtk.unit.Quantity, optional, default=12.01 * units.amu
+        particle2 mass
+    epsilon : simtk.unit.Quantity, optional, default=0.1700 * units.kilocalories_per_mole
+        particle Lennard-Jones well depth
+    sigma : simtk.unit.Quantity, optional, default=1.8240 * units.angstroms
+        particle Lennard-Jones sigma
+    charge : simtk.unit.Quantity, optional, default=0.0 * units.elementary_charge
+        charge to place on atomic centers to create a dipole
+    switch : bool, optional, default=True
+        flag to use nonbonded switching function
+    switch_width : simtk.unit.Quantity with units compatible with angstroms, optional, default=0.2*units.angstroms
+        switching function is turned on at cutoff - switch_width
+    dispersion_correction : bool, optional, default=True
+        if True, will use analytical dispersion correction (if not using switching function)
+    nx, ny, nz : int, optional, default=6
+        number of molecules in x, y, and z dimension
+
+
+    Notes
+    -----
+
+    The natural period of a harmonic oscillator is T = sqrt(m/K), so you will want to use an
+    integration timestep smaller than ~ T/10.
+
+    Examples
+    --------
+
+    Create an uncharged Diatomic fluid.
+
+    >>> diatom = DiatomicFluid()
+    >>> system, positions = diatom.system, diatom.positions
+
+    Create a dipolar fluid.
+
+    >>> diatom = DiatomicFluid(charge=1.0*units.elementary_charge)
+    >>> system, positions = diatom.system, diatom.positions
+
+    Create a Diatomic fluid with constraints instead of harmonic bonds
+
+    >>> diatom = DiatomicFluid(constraint=True)
+    >>> system, positions = diatom.system, diatom.positions
+
+    Specify a different system size.
+
+    >>> diatom = DiatomicFluid(constraint=True, nx=8, ny=8, nz=8)
+    >>> system, positions = diatom.system, diatom.positions
+
+    TODO
+    ----
+    
+    Add subrandom selection of orientations.
+    Add multiple electrostatics treatments.
+
+    """
+
+    def __init__(self, 
+        K=424.0* units.kilocalories_per_mole / units.angstrom**2,
+        r0=1.383 * units.angstroms,  
+        m1=14.01 * units.amu,
+        m2=14.01 * units.amu,
+        epsilon=0.1700 * units.kilocalories_per_mole, 
+        sigma=1.8240 * units.angstroms,
+        switch=True,
+        switch_width=0.5*units.angstroms,
+        cutoff=9.0*units.angstroms,
+        constraint=False,
+        dispersion_correction=True,
+        nx=6, ny=6, nz=6):
+        
+        nmolecules = nx * ny * nz
+        natoms = 2 * nmolecules
+
+        # Create an empty system object.
+        system = mm.System()
+
+        # Add particles to the system.
+        for molecule_index in range(nmolecules):
+            system.addParticle(m1)
+            system.addParticle(m2)
+
+        if constraint:
+            # Add constraint between particles.
+            for molecule_index in range(nmolecules):
+                system.addConstraint(2*molecule_index+0, 2*molecule_index+1, r0)
+        else:
+            # Add a harmonic bonds.
+            force = mm.HarmonicBondForce()
+            for molecule_index in range(nmolecules):
+                force.addBond(2*molecule_index+0, 2*molecule_index+1, r0, K)
+                system.addForce(force)
+
+        # Set up periodic nonbonded interactions with a cutoff.
+        nb = mm.NonbondedForce()
+        nb.setNonbondedMethod(mm.NonbondedForce.PME)
+        nb.setCutoffDistance(cutoff)
+        nb.setUseDispersionCorrection(dispersion_correction)
+        nb.setUseSwitchingFunction(switch)
+        nb.setSwitchingDistance(cutoff-switch_width)
+            
+        positions = units.Quantity(np.zeros([natoms,3],np.float32), units.angstrom)
+
+        maxX = 0.0 * units.angstrom
+        maxY = 0.0 * units.angstrom
+        maxZ = 0.0 * units.angstrom
+
+        dx = sigma/2
+        dy = 0
+        dz = 0
+
+        scaleStepSizeX = 1.0
+        scaleStepSizeY = 1.0
+        scaleStepSizeZ = 1.0
+
+        atom_index = 0
+        for ii in range(nx):
+            for jj in range(ny):
+                for kk in range(nz):
+                    # Compute particle center.
+                    x = sigma*scaleStepSizeX*ii
+                    y = sigma*scaleStepSizeY*jj
+                    z = sigma*scaleStepSizeZ*kk
+
+                    # Add particle 1.
+                    nb.addParticle(+charge, sigma, epsilon)
+
+                    positions[atom_index,0] = x - dx
+                    positions[atom_index,1] = y - dy
+                    positions[atom_index,2] = z - dz
+                    atom_index += 1
+
+                    # Add particle 2.
+                    nb.addParticle(-charge, sigma, epsilon)
+
+                    positions[atom_index,0] = x + dx
+                    positions[atom_index,1] = y + dy
+                    positions[atom_index,2] = z + dz
+                    atom_index += 1
+                    
+                    # Wrap center positions as needed.
+                    if x>maxX: maxX = x
+                    if y>maxY: maxY = y
+                    if z>maxZ: maxZ = z
+
+        # Add exceptions.
+        for molecule_index in range(nmolecules):
+            nb.addException(2*molecule_index+0, 2*molecule_index+1, charge*charge, sigma, epsilon*0.0)
+                    
+        # Set periodic box vectors.
+        x = maxX+2*sigma*scaleStepSizeX
+        y = maxY+2*sigma*scaleStepSizeY
+        z = maxZ+2*sigma*scaleStepSizeZ
+
+        a = units.Quantity((x,                0*units.angstrom, 0*units.angstrom))
+        b = units.Quantity((0*units.angstrom,                y, 0*units.angstrom))
+        c = units.Quantity((0*units.angstrom, 0*units.angstrom, z))
+        system.setDefaultPeriodicBoxVectors(a, b, c)
+
+        # Store number of degrees of freedom.
+        self.ndof = 3*natoms - nmolecules*constraint
+
+    def get_potential_expectation(self, state):
+        """Return the expectation of the potential energy, computed analytically or numerically.
+
+        Arguments
+        ---------
+        
+        state : ThermodynamicState with temperature defined
+            The thermodynamic state at which the property is to be computed.
+        
+        Returns
+        -------
+        
+        potential_mean : simtk.unit.Quantity compatible with simtk.unit.kilojoules_per_mole
+            The expectation of the potential energy.
+        
+        """
+
+        return (self.ndof/2.) * kB * state.temperature
+
+
+class UnconstrainedDiatomicFluid(DiatomicFluid):
+    """
+    Examples
+    --------
+
+    Create an unconstrained diatomic fluid.
+
+    >>> test = UnconstrainedDiatomicFluid()
+    >>> system, positions = test.system, test.positions
+    
+    """
+    def __init__(self, *args, **kwargs):
+       super(UnconstrainedDiatomicFluid, self).__init__(constraint=False, *args, **kwargs)
+
+class ConstrainedDiatomicFluid(DiatomicFluid):
+    """
+    Examples
+    --------
+
+    Create an constrained diatomic fluid.
+
+    >>> test = ConstrainedDiatomicFluid()
+    >>> system, positions = test.system, test.positions
+    
+    """
+    def __init__(self, *args, **kwargs):
+       super(ConstrainedDiatomicFluid, self).__init__(constraint=True, *args, **kwargs)
+
+class DipolarFluid(DiatomicFluid):
+    """
+    Examples
+    --------
+
+    Create a dipolar fluid.
+
+    >>> test = DipolarFluid()
+    >>> system, positions = test.system, test.positions
+    
+    """
+    def __init__(self, *args, **kwargs):
+       super(DipolarFluid, self).__init__(charge=0.25*units.elementary_charge, *args, **kwargs)
+
+class UnconstrainedDipolarFluid(DipolarFluid):
+    """
+    Examples
+    --------
+
+    Create a dipolar fluid.
+
+    >>> test = UnconstrainedDipolarFluid()
+    >>> system, positions = test.system, test.positions
+    
+    """
+    def __init__(self, *args, **kwargs):
+       super(UnconstrainedDipolarFluid, self).__init__(constraint=False, *args, **kwargs)
+
+class ConstrainedDipolarFluid(DipolarFluid):
+    """
+    Examples
+    --------
+
+    Create a dipolar fluid.
+
+    >>> test = ConstrainedDipolarFluid()
+    >>> system, positions = test.system, test.positions
+    
+    """
+    def __init__(self, *args, **kwargs):
+       super(ConstrainedDipolarFluid, self).__init__(constraint=True, *args, **kwargs)
         
 #=============================================================================================
 # Constraint-coupled harmonic oscillator

@@ -393,7 +393,7 @@ for index in range(rank, noptionsets, size):
     output = '%s : integrator %s | switch %s | platform %s | precision %s | constraint tolerance %s' % (system_name, integrator_name, str(switching_flag), platform_name, precision_model, '%.1e' % constraint_tolerance)
     print output
     outfile.write(output + '\n')
-
+    last_rms_total_energy = None
     for timestep_index in range(ntimesteps_to_try):
         timestep = timesteps_to_try[timestep_index]
 
@@ -443,9 +443,19 @@ for index in range(rank, noptionsets, size):
         ncfile.variables['rms_total_energy'][timestep_index] = rms_total_energy
         ncfile.sync()
 
-        output = "timestep %8.3f fs | RMS total energy %20.8e kT | drift %20.8e kT" % (timestep / units.femtoseconds, rms_total_energy, total_energy_drift)
+        output = "timestep %8.3f fs | RMS total energy %20.8f kT | drift %20.8f kT" % (timestep / units.femtoseconds, rms_total_energy, total_energy_drift)
         print output
-        outfile.write('%8.3f %24.8f %24.8f\n' % (timestep/units.femtoseconds, rms_total_energy, total_energy_drift))
+        if last_rms_total_energy:
+            factor = rms_total_energy / last_rms_total_energy
+            outfile.write('%8.3f %24.8e %24.8e %8.3f' % (timestep/units.femtoseconds, rms_total_energy, total_energy_drift, factor))
+        else:
+            outfile.write('%8.3f %24.8e %24.8e %8s' % (timestep/units.femtoseconds, rms_total_energy, total_energy_drift, ''))
+        last_rms_total_energy = rms_total_energy
+
+        if (total_energy_drift > 1.0):
+            outfile.write('***')
+
+        outfile.write('\n')
         
         # Clean up
         del context, integrator
