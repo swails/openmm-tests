@@ -619,7 +619,7 @@ class DiatomicFluid(TestSystem):
         cutoff=None,
         constraint=False,
         dispersion_correction=True,
-        nx=6, ny=6, nz=6):
+        nx=8, ny=8, nz=8):
         
         nmolecules = nx * ny * nz
         natoms = 2 * nmolecules
@@ -692,7 +692,7 @@ class DiatomicFluid(TestSystem):
 
         # Add exceptions.
         for molecule_index in range(nmolecules):
-            nb.addException(2*molecule_index+0, 2*molecule_index+1, charge*charge, sigma, epsilon*0.0)
+            nb.addException(2*molecule_index+0, 2*molecule_index+1, 0.0*charge*charge, sigma, 0.0*epsilon)
 
         system.addForce(nb)
                     
