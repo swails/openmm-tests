@@ -153,14 +153,14 @@ pressure = 1.0 * units.atmosphere # pressure for equilibration
 
 ghmc_nsteps = 1000 # number of steps to generate new uncorrelated sample with GHMC
 ghmc_timestep = 1.0 * units.femtoseconds
-nequil = 1000 # number of NPT equilibration iterations
+nequil = 100 # number of NPT equilibration iterations
 
 # DEBUG
 #systems_to_try = ['LennardJonesFluid']
 #systems_to_try = ['WaterBox']
 #gammas_to_try = units.Quantity([0.01], units.picoseconds**-1) # collision rates
 #timestep_correction_flags_to_try = [False]
-nequil = 3
+#nequil = 3
 #precision_models_to_try = ['double'] # precision models to try
 
 verbose = True
