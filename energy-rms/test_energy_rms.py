@@ -129,7 +129,7 @@ def select_options(options_list, index):
 #=============================================================================================
 
 # Sets of parameters to regress over.
-systems_to_try = ['UnconstrainedDiatomicFluid', 'ConstrainedDiatomicFluid', 'UnconstrainedDipolarFluid', 'ConstrainedDipolarFluid', 'Diatom', 'DischargedWaterBox', 'DischargedWaterBoxHsites', 'SodiumChlorideCrystal', 'HarmonicOscillator', 'LennardJonesCluster', 'LennardJonesFluid', 'WaterBox', 'FlexibleWaterBox', 'FourSiteWaterBox'] # testsystems to try
+systems_to_try = ['FourSiteWaterBox', 'UnconstrainedDiatomicFluid', 'ConstrainedDiatomicFluid', 'UnconstrainedDipolarFluid', 'ConstrainedDipolarFluid', 'Diatom', 'DischargedWaterBox', 'DischargedWaterBoxHsites', 'SodiumChlorideCrystal', 'HarmonicOscillator', 'LennardJonesCluster', 'LennardJonesFluid', 'WaterBox', 'FlexibleWaterBox'] # testsystems to try
 integrators_to_try = ['VerletIntegrator', 'VelocityVerletIntegrator'] # testsystems to try
 switching_to_try = [False, True] # switching function flags
 platform_names_to_try = ['CUDA', 'OpenCL', 'CPU', 'Reference'] # platform names to try
@@ -160,7 +160,7 @@ nequil = 1000 # number of NPT equilibration iterations
 #systems_to_try = ['WaterBox']
 #gammas_to_try = units.Quantity([0.01], units.picoseconds**-1) # collision rates
 #timestep_correction_flags_to_try = [False]
-#nequil = 1
+nequil = 3
 #precision_models_to_try = ['double'] # precision models to try
 
 verbose = True
@@ -231,6 +231,7 @@ for index in range(rank, nsystems, size):
         print "node %3d using GPU %d platform %s precision %s" % (rank, deviceid, platform_name, precision_model)
         
         # Create system to simulate.
+        print ""
         print "Creating system %s..." % system_name
         import testsystems
         constructor = getattr(testsystems, system_name)
@@ -240,7 +241,13 @@ for index in range(rank, nsystems, size):
         else:
             testsystem = constructor()
         [system, positions] = [testsystem.system, testsystem.positions]
-        ndof = 3*system.getNumParticles() - system.getNumConstraints()
+
+        # Determine number of degrees of freedom.
+        nvsites = sum([system.isVirtualSite(index) for index in range(system.getNumParticles())])
+        nparticles = system.getNumParticles()
+        nconstraints = system.getNumConstraints()
+        ndof = 3*(nparticles - nvsites) - nconstraints
+
         nparticles = system.getNumParticles()        
         print "Node %d: Box has %d particles" % (rank, nparticles)
 
@@ -262,7 +269,6 @@ for index in range(rank, nsystems, size):
 
         # Modify random number seeds to be unique.
         seed = ghmc_integrator.getRandomNumberSeed()
-        print seed
         ghmc_integrator.setRandomNumberSeed(seed + rank)
         barostat.setRandomNumberSeed(seed + rank + size)
             
@@ -297,12 +303,12 @@ for index in range(rank, nsystems, size):
             volume = box_vectors[0,0] * box_vectors[1,1] * box_vectors[2,2]
             volume_history[iteration] = volume / units.nanometers**3
             max_radius = box_vectors[0,0] / 2.0 # half the box width
-            instantaneous_kinetic_temperature = kinetic / (1.5 * system.getNumParticles() * kB)
+            instantaneous_kinetic_temperature = kinetic / (ndof * kB / 2.0)
 
             naccept = ghmc_integrator.getGlobalVariable(ghmc_global_variables['naccept'])
             ntrials = ghmc_integrator.getGlobalVariable(ghmc_global_variables['ntrials'])
             fraction_accepted = float(naccept) / float(ntrials)
-            print "GHMC equil %5d / %5d | accepted %6d / %6d (%7.3f %%) | volume %8.3f nm^3 | max radius %8.3f nm | potential %8.3f kT | temperature %8.3f K" % (iteration, nequil, naccept, ntrials, fraction_accepted*100.0, volume / units.nanometers**3, max_radius / units.nanometers, potential / kT, instantaneous_kinetic_temperature / units.kelvin)
+            print "GHMC equil %5d / %5d | accepted %6d / %6d (%7.3f %%) | volume %8.3f nm^3 | max radius %8.3f nm | potential %12.3f kT | temperature %8.3f K" % (iteration, nequil, naccept, ntrials, fraction_accepted*100.0, volume / units.nanometers**3, max_radius / units.nanometers, potential / kT, instantaneous_kinetic_temperature / units.kelvin)
         
         # Extract coordinates and box vectors.
         state = ghmc_context.getState(getPositions=True, getVelocities=True)

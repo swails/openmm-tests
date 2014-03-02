@@ -619,7 +619,7 @@ class DiatomicFluid(TestSystem):
         cutoff=None,
         constraint=False,
         dispersion_correction=True,
-        nx=8, ny=8, nz=8):
+        nx=7, ny=7, nz=7):
         
         nmolecules = nx * ny * nz
         natoms = 2 * nmolecules
@@ -656,9 +656,9 @@ class DiatomicFluid(TestSystem):
         dy = 0 * sigma
         dz = 0 * sigma
 
-        scaleStepSizeX = 1.0
-        scaleStepSizeY = 1.0
-        scaleStepSizeZ = 1.0
+        scaleStepSizeX = 2.0
+        scaleStepSizeY = 2.0
+        scaleStepSizeZ = 2.0
 
         atom_index = 0
         for ii in range(nx):
@@ -1745,7 +1745,7 @@ class WaterBox(TestSystem):
        # Add solvent to specified box dimensions.
        boxSize = units.Quantity(numpy.ones([3]) * box_edge/box_edge.unit, box_edge.unit)
        m.addSolvent(ff, boxSize=boxSize, model=model)
-   
+
        # Get new topology and coordinates.
        newtop = m.getTopology()
        newpos = m.getPositions()
@@ -1755,14 +1755,16 @@ class WaterBox(TestSystem):
    
        # Create OpenMM System.
        nonbondedMethod = app.CutoffPeriodic
-       constraints = app.HBonds
-       system = ff.createSystem(newtop, nonbondedMethod=nonbondedMethod, nonbondedCutoff=cutoff, constraints=constraints, rigidWater=constrained, removeCMMotion=False)
+       system = ff.createSystem(newtop, nonbondedMethod=nonbondedMethod, nonbondedCutoff=cutoff, constraints=None, rigidWater=constrained, removeCMMotion=False)
+
+       print "There are %d particles and %d constraints" % (system.getNumParticles(), system.getNumConstraints())
 
        # Turn on switching function.
        forces = { system.getForce(index).__class__.__name__ : system.getForce(index) for index in range(system.getNumForces()) }
        forces['NonbondedForce'].setUseSwitchingFunction(True)
        forces['NonbondedForce'].setSwitchingDistance(cutoff - switch_width)
-       
+
+       self.ndof = 3*system.getNumParticles() - 3*constrained
        self.system, self.positions = system, positions
 
 class FlexibleWaterBox(WaterBox):
@@ -1797,7 +1799,7 @@ class FlexibleWaterBox(WaterBox):
        >>> [system, positions] = [waterbox.system, waterbox.positions]
        
        """
-       super(FlexibleWaterBox, self).__init__(model='tip4pew', constrained=False, *args, **kwargs)
+       super(FlexibleWaterBox, self).__init__(model='tip3p', constrained=False, *args, **kwargs)
 
 class FourSiteWaterBox(WaterBox):
    """
@@ -1904,7 +1906,7 @@ class DischargedWaterBox(WaterBox):
 
    """
 
-   def __init__(self, box_edge=2.5*units.nanometers, cutoff=0.9*units.nanometers, model='tip3p', switch=True, switch_width=0.5*units.angstroms):
+   def __init__(self, *args, **kwargs):
        """
        Create a water box test systemm using a four-site water model (TIP4P-Ew).
        
@@ -1929,7 +1931,7 @@ class DischargedWaterBox(WaterBox):
        >>> waterbox = DischargedWaterBox(box_edge=3.0*units.nanometers, cutoff=1.0*units.nanometers)
        
        """
-       super(DischargedWaterBox, self).__init__(box_edge=box_edge, cutoff=cutoff, model=model, switch=switch, switch_width=switch_width)
+       super(DischargedWaterBox, self).__init__(*args, **kwargs)
 
        # Zero charges.
        system = self.system
@@ -1961,7 +1963,7 @@ class DischargedWaterBoxHsites(WaterBox):
 
    """
 
-   def __init__(self, box_edge=2.5*units.nanometers, cutoff=0.9*units.nanometers, model='tip3p', switch=True, switch_width=0.5*units.angstroms):
+   def __init__(self, *args, **kwargs):
        """
        Create a water box test systemm using a four-site water model (TIP4P-Ew).
        
@@ -1986,7 +1988,7 @@ class DischargedWaterBoxHsites(WaterBox):
        >>> waterbox = DischargedWaterBox(box_edge=3.0*units.nanometers, cutoff=1.0*units.nanometers)
        
        """
-       super(DischargedWaterBoxHsites, self).__init__(box_edge=box_edge, cutoff=cutoff, model=model, switch=switch, switch_width=switch_width)
+       super(DischargedWaterBoxHsites, self).__init__(*args, **kwargs)
 
        # Zero charges.
        system = self.system
@@ -1996,11 +1998,14 @@ class DischargedWaterBoxHsites(WaterBox):
            [charge, sigma, epsilon] = force.getParticleParameters(index)
            charge *= 0
            if epsilon == 0.0 * units.kilojoules_per_mole:
-               epsilon = 0.1 * units.kilojoules_per_mole
+               # Add LJ site to hydrogens.
+               epsilon = 0.0157 * units.kilojoules_per_mole
+               sigma = 0.06 * units.angstroms
            force.setParticleParameters(index, charge, sigma, epsilon)
        for index in range(force.getNumExceptions()):
            [particle1, particle2, chargeProd, sigma, epsilon] = force.getExceptionParameters(index)
            chargeProd *= 0
+           epsilon *= 0
            force.setExceptionParameters(index, particle1, particle2, chargeProd, sigma, epsilon)
            
        return
