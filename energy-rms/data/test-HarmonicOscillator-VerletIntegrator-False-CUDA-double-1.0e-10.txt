@@ -1,0 +1,5 @@
+HarmonicOscillator : integrator VerletIntegrator | switch False | platform CUDA | precision double | constraint tolerance 1.0e-10
+   0.125           1.74154450e-06          -3.04075772e-03         
+   0.250           6.98866714e-06          -1.22617290e-02    4.013
+   0.500           2.81539080e-05          -4.95569125e-02    4.029
+   1.000           1.14228929e-04          -2.01348438e-01    4.057

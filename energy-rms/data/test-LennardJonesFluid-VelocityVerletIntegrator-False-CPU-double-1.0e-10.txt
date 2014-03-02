@@ -1,0 +1,5 @@
+LennardJonesFluid : integrator VelocityVerletIntegrator | switch False | platform CPU | precision double | constraint tolerance 1.0e-10
+   0.125           7.30417681e-02          -2.29494469e+03         
+   0.250           7.30358952e-02          -2.29431218e+03    1.000
+   0.500           7.29877658e-02          -2.29141887e+03    0.999
+   1.000           7.29363651e-02          -2.28470031e+03    0.999

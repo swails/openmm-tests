@@ -1,0 +1,5 @@
+Diatom : integrator VerletIntegrator | switch True | platform Reference | precision mixed | constraint tolerance 1.0e-05
+   0.125           1.19692064e-05           2.81059355e-01         
+   0.250           4.77553695e-05           1.12078346e+00    3.990      ***
+   0.500           1.90077298e-04           4.45580361e+00    3.980      ***
+   1.000           7.53188104e-04           1.76092927e+01    3.963      ***

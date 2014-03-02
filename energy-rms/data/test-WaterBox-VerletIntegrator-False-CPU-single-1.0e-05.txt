@@ -1,0 +1,5 @@
+WaterBox : integrator VerletIntegrator | switch False | platform CPU | precision single | constraint tolerance 1.0e-05
+   0.125           3.52880834e-02          -5.52870718e+02         
+   0.250           4.06650784e-02          -5.03641736e+02    1.152
+   0.500           4.59628983e-02          -1.82333516e+02    1.130
+   1.000           8.25160271e-02           7.53853990e+02    1.795      ***

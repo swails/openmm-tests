@@ -1,0 +1,5 @@
+DischargedWaterBoxHsites : integrator VerletIntegrator | switch False | platform OpenCL | precision mixed | constraint tolerance 1.0e-05
+   0.125           4.85317155e-02           7.53731246e+02               ***
+   0.250           4.92930297e-02           7.63934652e+02    1.016      ***
+   0.500           6.48747583e-02           5.20717436e+02    1.316      ***
+   1.000           1.22745350e-01          -5.85813736e+02    1.892

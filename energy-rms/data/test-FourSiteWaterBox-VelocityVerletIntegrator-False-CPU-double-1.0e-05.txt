@@ -1,0 +1,5 @@
+FourSiteWaterBox : integrator VelocityVerletIntegrator | switch False | platform CPU | precision double | constraint tolerance 1.0e-05
+   0.125           2.16829187e-01           2.33179220e+03               ***
+   0.250           3.98160427e-01           6.65078733e+03    1.836      ***
+   0.500           7.48975302e-01           1.56743349e+04    1.881      ***
+   1.000           1.09762690e+00           2.54963812e+04    1.466      ***

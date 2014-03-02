@@ -1,0 +1,5 @@
+ConstrainedDiatomicFluid : integrator VerletIntegrator | switch False | platform CPU | precision mixed | constraint tolerance 1.0e-10
+   0.125           1.06708796e-03          -1.41428473e+01         
+   0.250           1.05917222e-03          -1.79767596e+01    0.993
+   0.500           1.11118445e-03          -2.83365484e+01    1.049
+   1.000           1.93896242e-03          -7.24163707e+01    1.745

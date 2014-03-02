@@ -1,0 +1,5 @@
+UnconstrainedDiatomicFluid : integrator VelocityVerletIntegrator | switch True | platform CPU | precision double | constraint tolerance 1.0e-10
+   0.125           9.57076476e-04          -2.22480592e+01         
+   0.250           2.22684388e-03          -2.58737874e+01    2.327
+   0.500           8.04439767e-03          -3.96978484e+01    3.612
+   1.000           3.00556479e-02          -9.53518898e+01    3.736

@@ -1,0 +1,5 @@
+SodiumChlorideCrystal : integrator VelocityVerletIntegrator | switch False | platform CUDA | precision single | constraint tolerance 1.0e-10
+   0.125           2.09888729e+00           1.37893464e+02               ***
+   0.250           2.09579297e+00           1.91938233e+02    0.999      ***
+   0.500           2.14638613e+00          -6.90351933e+02    1.024
+   1.000           2.13835593e+00           6.97066762e+01    0.996      ***

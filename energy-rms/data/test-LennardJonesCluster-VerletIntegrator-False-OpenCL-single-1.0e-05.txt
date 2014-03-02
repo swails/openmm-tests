@@ -1,0 +1,5 @@
+LennardJonesCluster : integrator VerletIntegrator | switch False | platform OpenCL | precision single | constraint tolerance 1.0e-05
+   0.125           7.43386190e-06           7.37953664e-02         
+   0.250           1.99759876e-06          -5.70720634e-02    0.269
+   0.500           1.30104551e-06           2.75353871e-02    0.651
+   1.000           2.16450963e-06           5.46186978e-02    1.664

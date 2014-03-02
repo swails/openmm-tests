@@ -1,0 +1,5 @@
+LennardJonesCluster : integrator VelocityVerletIntegrator | switch False | platform CUDA | precision single | constraint tolerance 1.0e-05
+   0.125           7.61770607e-04           1.93731678e+01               ***
+   0.250           5.29411552e-04          -1.38539747e+01    0.695
+   0.500           7.10227584e-05          -6.88614706e-01    0.134
+   1.000           7.05753411e-05          -1.12537365e-01    0.994

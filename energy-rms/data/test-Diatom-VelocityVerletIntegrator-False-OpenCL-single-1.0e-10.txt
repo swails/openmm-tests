@@ -1,0 +1,5 @@
+Diatom : integrator VelocityVerletIntegrator | switch False | platform OpenCL | precision single | constraint tolerance 1.0e-10
+   0.125           3.94631587e-06          -1.43014805e-01         
+   0.250           8.10502791e-06          -9.50224526e-02    2.054
+   0.500           2.56847361e-05          -1.35677629e-01    3.169
+   1.000           1.01807574e-04          -5.46920370e-01    3.964

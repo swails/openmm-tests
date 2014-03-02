@@ -1,0 +1,5 @@
+UnconstrainedDiatomicFluid : integrator VelocityVerletIntegrator | switch True | platform OpenCL | precision mixed | constraint tolerance 1.0e-05
+   0.125           9.79605639e-04          -2.61275729e+01         
+   0.250           2.24954840e-03          -2.33914833e+01    2.296
+   0.500           8.07273891e-03          -3.74790997e+01    3.589
+   1.000           3.00732159e-02          -9.31252819e+01    3.725

@@ -1,0 +1,5 @@
+LennardJonesCluster : integrator VerletIntegrator | switch True | platform CUDA | precision mixed | constraint tolerance 1.0e-10
+   0.125           5.95958741e-07           3.10999454e-03         
+   0.250           1.15328182e-06           1.82322061e-02    1.935
+   0.500           3.65396790e-06           7.51173614e-02    3.168
+   1.000           1.41940967e-05           2.97753091e-01    3.885

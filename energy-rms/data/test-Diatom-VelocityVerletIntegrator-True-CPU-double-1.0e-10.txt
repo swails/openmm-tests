@@ -1,0 +1,5 @@
+Diatom : integrator VelocityVerletIntegrator | switch True | platform CPU | precision double | constraint tolerance 1.0e-10
+   0.125           1.20004212e-05           2.81932438e-01         
+   0.250           4.80049225e-05           1.12776218e+00    4.000      ***
+   0.500           1.92071507e-04           4.51156674e+00    4.001      ***
+   1.000           7.69116100e-04           1.80545172e+01    4.004      ***

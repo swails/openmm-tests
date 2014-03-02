@@ -1,0 +1,5 @@
+DischargedWaterBoxHsites : integrator VelocityVerletIntegrator | switch True | platform CPU | precision double | constraint tolerance 1.0e-10
+   0.125           2.51212258e-02           9.15769086e+02               ***
+   0.250           2.30552161e-02           6.24681316e+02    0.918      ***
+   0.500           2.66633662e-02           2.17757988e+02    1.157      ***
+   1.000           5.92612627e-02          -6.70089717e+02    2.223
