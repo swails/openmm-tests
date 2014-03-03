@@ -1,0 +1,5 @@
+ConstrainedDiatomicFluid : integrator VerletIntegrator | switch True | platform CUDA | precision single | constraint tolerance 1.0e-05
+   0.125           4.11605141e-04           8.68898288e-01         
+   0.250           4.45097559e-04           1.12509058e+00    1.081      ***
+   0.500           7.55085628e-04           1.06624379e+01    1.696      ***
+   1.000           2.52502451e-03           5.71220495e+01    3.344      ***

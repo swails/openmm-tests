@@ -349,7 +349,21 @@ for index in range(rank, noptionsets, size):
     except:
         continue
 
+    #=============================================================================================
+    # Create filename to store data in.
+    #=============================================================================================
+
+    store_filename = 'data/test-%s-%s-%s-%s-%s-%s.nc' % (system_name, integrator_name, str(switching_flag), platform_name, precision_model, '%.1e' % constraint_tolerance)
+    text_filename = 'data/test-%s-%s-%s-%s-%s-%s.txt' % (system_name, integrator_name, str(switching_flag), platform_name, precision_model, '%.1e' % constraint_tolerance)
+
+    # Skip if we already have written this file.
+    if os.path.exists(store_filename) and os.path.exists(text_filename):
+        continue
+
+    #=============================================================================================
     # Select platform.
+    #=============================================================================================
+
     platform = openmm.Platform.getPlatformByName(platform_name)
     deviceid = rank % ngpus
     if platform_name == 'CUDA':
@@ -371,17 +385,6 @@ for index in range(rank, noptionsets, size):
     serialized_system = str(ncfile.variables['system'][0])    
     system = openmm.XmlSerializer.deserialize(serialized_system)
     ncfile.close()
-
-    #=============================================================================================
-    # Create filename to store data in.
-    #=============================================================================================
-
-    store_filename = 'data/test-%s-%s-%s-%s-%s-%s.nc' % (system_name, integrator_name, str(switching_flag), platform_name, precision_model, '%.1e' % constraint_tolerance)
-    text_filename = 'data/test-%s-%s-%s-%s-%s-%s.txt' % (system_name, integrator_name, str(switching_flag), platform_name, precision_model, '%.1e' % constraint_tolerance)
-
-    # Skip if we already have written this file.
-    if os.path.exists(store_filename) and os.path.exists(text_filename):
-        continue
 
     #=============================================================================================
     # Open NetCDF file for writing.

@@ -1,0 +1,5 @@
+DischargedWaterBox : integrator VerletIntegrator | switch False | platform CUDA | precision mixed | constraint tolerance 1.0e-05
+   0.125           3.70313666e-02          -5.80049124e+02         
+   0.250           4.08490661e-02          -7.02590936e+02    1.103
+   0.500           3.41983075e-02           8.99516812e+01    0.837      ***
+   1.000           7.30580738e-02           3.66654697e+02    2.136      ***

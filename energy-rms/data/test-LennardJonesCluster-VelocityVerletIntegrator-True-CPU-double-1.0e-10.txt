@@ -1,0 +1,5 @@
+LennardJonesCluster : integrator VelocityVerletIntegrator | switch True | platform CPU | precision double | constraint tolerance 1.0e-10
+   0.125           5.33126378e-07           8.80695687e-03         
+   0.250           9.74346476e-07           1.25441207e-02    1.828
+   0.500           3.52139526e-06           6.82865534e-02    3.614
+   1.000           1.40537282e-05           2.89068099e-01    3.991

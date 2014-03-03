@@ -1,5 +1,5 @@
 LennardJonesFluid : integrator VelocityVerletIntegrator | switch True | platform OpenCL | precision mixed | constraint tolerance 1.0e-05
-   0.125           4.79383781e-02          -3.27717461e+02         
+   0.125           4.79383745e-02          -3.27717461e+02         
    0.250           4.79399983e-02          -3.27531919e+02    1.000
-   0.500           4.79549911e-02          -3.28389476e+02    1.000
-   1.000           4.79024453e-02          -3.34268881e+02    0.999
+   0.500           4.79550129e-02          -3.28389476e+02    1.000
+   1.000           4.79024454e-02          -3.34268881e+02    0.999

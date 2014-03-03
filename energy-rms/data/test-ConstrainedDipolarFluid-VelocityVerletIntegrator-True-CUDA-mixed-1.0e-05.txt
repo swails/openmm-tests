@@ -1,0 +1,5 @@
+ConstrainedDipolarFluid : integrator VelocityVerletIntegrator | switch True | platform CUDA | precision mixed | constraint tolerance 1.0e-05
+   0.125           1.85617179e-02          -1.57266641e+00         
+   0.250           1.84577064e-02          -9.70614662e+00    0.994
+   0.500           1.81914192e-02           2.35304719e+01    0.986      ***
+   1.000           1.91449201e-02           1.12685334e+02    1.052      ***
