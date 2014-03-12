@@ -1,5 +1,0 @@
-FourSiteWaterBox : integrator VerletIntegrator | switch False | platform CPU | precision single | constraint tolerance 1.0e-10
-   0.125           6.38592386e-02          -1.12566617e+03         
-   0.250           6.29899257e-02          -1.28725570e+03    0.986
-   0.500           7.07966527e-02          -4.83019683e+02    1.124
-   1.000           1.08091420e-01          -7.47471208e+02    1.527

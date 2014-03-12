@@ -1,5 +1,0 @@
-FourSiteWaterBox : integrator VerletIntegrator | switch False | platform CUDA | precision mixed | constraint tolerance 1.0e-10
-   0.125           6.37208231e-02          -1.19202172e+03         
-   0.250           6.30554642e-02          -1.28748283e+03    0.990
-   0.500           7.04092353e-02          -5.59751700e+02    1.117
-   1.000           1.08541310e-01          -7.04027968e+02    1.542

@@ -1,5 +1,0 @@
-FlexibleWaterBox : integrator VelocityVerletIntegrator | switch True | platform OpenCL | precision single | constraint tolerance 1.0e-10
-   0.125           2.45264326e-01           6.15390607e+02               ***
-   0.250           9.86355370e-01           3.96535369e+03    4.022      ***
-   0.500           4.02116753e+00           3.03638162e+04    4.077      ***
-   1.000           1.73814455e+01           1.31270277e+05    4.322      ***

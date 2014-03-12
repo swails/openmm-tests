@@ -1,5 +1,0 @@
-DischargedWaterBox : integrator VerletIntegrator | switch True | platform OpenCL | precision mixed | constraint tolerance 1.0e-10
-   0.125           4.17950366e-02          -1.03948336e+03         
-   0.250           3.92206184e-02          -7.08893490e+02    0.938
-   0.500           4.29658764e-02          -4.58191200e+02    1.095
-   1.000           5.92831987e-02           1.03746774e+03    1.380      ***

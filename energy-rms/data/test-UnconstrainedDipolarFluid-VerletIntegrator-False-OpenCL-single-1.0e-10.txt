@@ -1,5 +1,0 @@
-UnconstrainedDipolarFluid : integrator VerletIntegrator | switch False | platform OpenCL | precision single | constraint tolerance 1.0e-10
-   0.125           2.01082306e-02          -5.17120496e+02         
-   0.250           2.20172779e-02          -5.48717404e+02    1.095
-   0.500           3.27408211e-02          -5.80815291e+02    1.487
-   1.000           1.35628570e-01          -8.91128997e+02    4.142

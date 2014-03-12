@@ -1,5 +1,0 @@
-WaterBox : integrator VerletIntegrator | switch True | platform CUDA | precision single | constraint tolerance 1.0e-05
-   0.125           3.24174704e-02           5.89323876e+02               ***
-   0.250           3.02248037e-02           2.70914597e+02    0.932      ***
-   0.500           3.92516758e-02           3.88193360e+02    1.299      ***
-   1.000           1.00624656e-01           1.87803360e+03    2.564      ***

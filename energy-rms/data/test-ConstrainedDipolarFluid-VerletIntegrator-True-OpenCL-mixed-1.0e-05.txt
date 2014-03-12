@@ -1,5 +1,0 @@
-ConstrainedDipolarFluid : integrator VerletIntegrator | switch True | platform OpenCL | precision mixed | constraint tolerance 1.0e-05
-   0.125           1.82408887e-02           1.21033162e+01               ***
-   0.250           1.78224133e-02           1.98214422e+01    0.977      ***
-   0.500           1.76952713e-02           3.68355016e+01    0.993      ***
-   1.000           1.84851009e-02           1.09579445e+02    1.045      ***

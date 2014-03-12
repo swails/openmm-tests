@@ -1,5 +1,0 @@
-LennardJonesFluid : integrator VelocityVerletIntegrator | switch True | platform CUDA | precision double | constraint tolerance 1.0e-05
-   0.125           4.79364579e-02          -3.27997520e+02         
-   0.250           4.79374625e-02          -3.28028680e+02    1.000
-   0.500           4.79298066e-02          -3.28336796e+02    1.000
-   1.000           4.78955745e-02          -3.33814634e+02    0.999

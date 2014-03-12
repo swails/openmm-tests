@@ -1,5 +1,0 @@
-DischargedWaterBoxHsites : integrator VelocityVerletIntegrator | switch False | platform CUDA | precision single | constraint tolerance 1.0e-10
-   0.125           1.56883577e+00           2.93870290e+04               ***
-   0.250           2.00399958e-01           5.20849078e+03    0.128      ***
-   0.500           9.17264933e-02           7.13603172e+02    0.458      ***
-   1.000           1.04415597e-01          -1.40627799e+03    1.138

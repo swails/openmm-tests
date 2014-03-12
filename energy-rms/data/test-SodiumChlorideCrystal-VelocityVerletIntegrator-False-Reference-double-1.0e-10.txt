@@ -1,5 +1,0 @@
-SodiumChlorideCrystal : integrator VelocityVerletIntegrator | switch False | platform Reference | precision double | constraint tolerance 1.0e-10
-   0.125           2.09885130e+00           1.43334756e+02               ***
-   0.250           2.09581846e+00           1.92441152e+02    0.999      ***
-   0.500           2.14641829e+00          -6.90386736e+02    1.024
-   1.000           2.13837324e+00           7.01601802e+01    0.996      ***

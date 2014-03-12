@@ -1,5 +1,0 @@
-DischargedWaterBoxHsites : integrator VelocityVerletIntegrator | switch True | platform OpenCL | precision mixed | constraint tolerance 1.0e-05
-   0.125           2.51023353e-02           9.02939100e+02               ***
-   0.250           2.30810181e-02           6.16427683e+02    0.919      ***
-   0.500           2.68069496e-02           2.34565573e+02    1.161      ***
-   1.000           5.91038079e-02          -7.17033483e+02    2.205

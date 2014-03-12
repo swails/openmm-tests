@@ -1,5 +1,0 @@
-UnconstrainedDipolarFluid : integrator VerletIntegrator | switch False | platform Reference | precision double | constraint tolerance 1.0e-10
-   0.125           2.15456127e-02          -5.60432353e+02         
-   0.250           2.16745232e-02          -5.72109734e+02    1.006
-   0.500           3.34121000e-02          -6.23210721e+02    1.542
-   1.000           1.35485028e-01          -9.32126890e+02    4.055

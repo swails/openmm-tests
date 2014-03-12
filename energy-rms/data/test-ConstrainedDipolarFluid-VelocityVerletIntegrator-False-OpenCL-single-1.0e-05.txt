@@ -1,5 +1,0 @@
-ConstrainedDipolarFluid : integrator VelocityVerletIntegrator | switch False | platform OpenCL | precision single | constraint tolerance 1.0e-05
-   0.125           5.49323170e-01           1.15291477e+04               ***
-   0.250           3.16082628e-01           2.78054628e+03    0.575      ***
-   0.500           1.26420974e-01          -2.98350848e+03    0.400
-   1.000           2.51232172e-02          -7.08035607e+02    0.199

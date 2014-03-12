@@ -1,5 +1,0 @@
-FourSiteWaterBox : integrator VerletIntegrator | switch True | platform OpenCL | precision mixed | constraint tolerance 1.0e-10
-   0.125           5.47189753e-02           1.58998145e+03               ***
-   0.250           5.32598874e-02           1.64077744e+03    0.973      ***
-   0.500           4.67304755e-02           1.48505958e+03    0.877      ***
-   1.000           1.19413913e-01           2.36675431e+03    2.555      ***

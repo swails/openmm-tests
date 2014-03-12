@@ -18,7 +18,7 @@
 #   ppn: how many cores per node to use (1 through 8)
 #       (you are always charged for the entire node)
 ##PBS -l nodes=1:ppn=1:gpus=1:shared:gtxtitan
-#PBS -l nodes=12:ppn=1:gpus=1:shared:gtx680
+#PBS -l nodes=5:ppn=1:gpus=1:shared:gtx680
 #
 # export all my environment variables to the job
 ##PBS -V

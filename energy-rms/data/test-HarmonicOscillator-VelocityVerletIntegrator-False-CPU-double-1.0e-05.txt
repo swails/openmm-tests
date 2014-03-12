@@ -1,5 +1,0 @@
-HarmonicOscillator : integrator VelocityVerletIntegrator | switch False | platform CPU | precision double | constraint tolerance 1.0e-05
-   0.125           1.73443113e-06          -3.05999671e-03         
-   0.250           6.93776405e-06          -1.22413167e-02    4.000
-   0.500           2.77516890e-05          -4.89865471e-02    4.000
-   1.000           1.11016885e-04          -1.96286725e-01    4.000

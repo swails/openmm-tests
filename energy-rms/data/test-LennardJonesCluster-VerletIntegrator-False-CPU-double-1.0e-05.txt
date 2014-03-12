@@ -1,5 +1,0 @@
-LennardJonesCluster : integrator VerletIntegrator | switch False | platform CPU | precision double | constraint tolerance 1.0e-05
-   0.125           1.55221624e-07          -2.74675841e-03         
-   0.250           1.75574111e-07           2.46203776e-03    1.131
-   0.500           4.95268580e-07           1.39957684e-02    2.821
-   1.000           1.90138391e-06           5.88816582e-02    3.839

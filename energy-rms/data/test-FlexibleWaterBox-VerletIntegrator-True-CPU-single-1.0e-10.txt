@@ -1,5 +1,0 @@
-FlexibleWaterBox : integrator VerletIntegrator | switch True | platform CPU | precision single | constraint tolerance 1.0e-10
-   0.125           2.45661220e-01           3.69671613e+02               ***
-   0.250           9.86032480e-01           3.95780631e+03    4.014      ***
-   0.500           4.02342118e+00           3.03637492e+04    4.080      ***
-   1.000           1.74210489e+01           1.36256744e+05    4.330      ***

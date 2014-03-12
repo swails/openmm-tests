@@ -1,5 +1,0 @@
-ConstrainedDipolarFluid : integrator VerletIntegrator | switch False | platform CUDA | precision single | constraint tolerance 1.0e-05
-   0.125           1.99750221e-02          -6.01372624e+02         
-   0.250           2.03165823e-02          -6.10437552e+02    1.017
-   0.500           2.04454808e-02          -6.40028572e+02    1.006
-   1.000           2.15169076e-02          -6.70511824e+02    1.052

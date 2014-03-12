@@ -1,5 +1,0 @@
-Diatom : integrator VelocityVerletIntegrator | switch False | platform Reference | precision mixed | constraint tolerance 1.0e-05
-   0.125           1.59729968e-06          -7.84389728e-03         
-   0.250           6.38936058e-06          -3.13872903e-02    4.000
-   0.500           2.55600331e-05          -1.25736431e-01    4.000
-   1.000           1.02281660e-04          -5.05945313e-01    4.002

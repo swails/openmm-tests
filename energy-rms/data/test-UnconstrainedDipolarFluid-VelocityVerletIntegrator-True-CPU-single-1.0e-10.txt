@@ -1,5 +1,0 @@
-UnconstrainedDipolarFluid : integrator VelocityVerletIntegrator | switch True | platform CPU | precision single | constraint tolerance 1.0e-10
-   0.125           1.89885411e-02           3.91712558e+02               ***
-   0.250           1.99228261e-02           3.87031497e+02    1.049      ***
-   0.500           2.87082222e-02           4.00254644e+02    1.441      ***
-   1.000           8.20643023e-02           4.43912350e+02    2.859      ***

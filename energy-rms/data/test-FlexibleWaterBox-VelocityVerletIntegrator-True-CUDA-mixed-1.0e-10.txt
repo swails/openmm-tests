@@ -1,5 +1,0 @@
-FlexibleWaterBox : integrator VelocityVerletIntegrator | switch True | platform CUDA | precision mixed | constraint tolerance 1.0e-10
-   0.125           2.45419319e-01           6.08321885e+02               ***
-   0.250           9.86402890e-01           4.04131012e+03    4.019      ***
-   0.500           4.02125875e+00           3.02553989e+04    4.077      ***
-   1.000           1.73813622e+01           1.31219494e+05    4.322      ***

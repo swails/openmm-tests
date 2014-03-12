@@ -1,5 +1,0 @@
-Diatom : integrator VerletIntegrator | switch False | platform CUDA | precision double | constraint tolerance 1.0e-10
-   0.125           1.58905282e-06          -8.07058260e-03         
-   0.250           6.32359035e-06          -3.31950633e-02    3.979
-   0.500           2.50370420e-05          -1.40105615e-01    3.959
-   1.000           9.81463583e-05          -6.19374392e-01    3.920

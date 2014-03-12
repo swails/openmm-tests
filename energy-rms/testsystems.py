@@ -1676,7 +1676,7 @@ class WaterBox(TestSystem):
 
    """
 
-   def __init__(self, box_edge=2.5*units.nanometers, cutoff=0.9*units.nanometers, model='tip3p', switch=True, switch_width=0.5*units.angstroms, constrained=True):
+   def __init__(self, box_edge=2.5*units.nanometers, cutoff=0.9*units.nanometers, model='tip3p', switch=True, switch_width=0.5*units.angstroms, constrained=True, dispersion_correction=True, use_pme=True):
        """
        Create a water box test system.
        
@@ -1694,7 +1694,11 @@ class WaterBox(TestSystem):
        switch_width : simtk.unit.Quantity with units compatible with nanometers, optional, default = 0.5 A
           Sets the width of the switch function for Lennard-Jones.
        constrained : bool, optional, default=True
-          Sets whether bonds should be constrained or flexible.
+          Sets whether water geometry should be constrained (rigid water implemented via SETTLE) or flexible.
+       dispersion_correction : bool, optional, default=True
+          Sets whether the long-range dispersion correction should be used.
+       use_pme : bool, optional, default=True
+          If True, PME is used; if False, reaction field is used.
        
        Examples
        --------
@@ -1704,6 +1708,10 @@ class WaterBox(TestSystem):
        >>> waterbox = WaterBox()
        >>> [system, positions] = [waterbox.system, waterbox.positions]
        
+       Use reaction-field electrostatics instead.
+
+       >>> waterbox = WaterBox(use_pme=False)
+
        Control the cutoff.
        
        >>> waterbox = WaterBox(box_edge=3.0*units.nanometers, cutoff=1.0*units.nanometers)
@@ -1723,6 +1731,10 @@ class WaterBox(TestSystem):
        Set the switch width.
 
        >>> waterbox = WaterBox(switch=True, switch_width=0.8*units.angstroms)
+
+       Turn of long-range dispersion correction.
+
+       >>> waterbox = WaterBox(dispersion_correction=False)
 
        """
 
@@ -1754,82 +1766,56 @@ class WaterBox(TestSystem):
        positions = units.Quantity(numpy.array(newpos / newpos.unit), newpos.unit)
    
        # Create OpenMM System.
-       nonbondedMethod = app.CutoffPeriodic
+       if use_pme:
+           nonbondedMethod = app.PME
+       else:
+           nonbondedMethod = app.CutoffPeriodic
        system = ff.createSystem(newtop, nonbondedMethod=nonbondedMethod, nonbondedCutoff=cutoff, constraints=None, rigidWater=constrained, removeCMMotion=False)
 
-       print "There are %d particles and %d constraints" % (system.getNumParticles(), system.getNumConstraints())
-
-       # Turn on switching function.
+       # Set switching function and dispersion correction.
        forces = { system.getForce(index).__class__.__name__ : system.getForce(index) for index in range(system.getNumForces()) }
-       forces['NonbondedForce'].setUseSwitchingFunction(True)
+       forces['NonbondedForce'].setUseSwitchingFunction(switch)
        forces['NonbondedForce'].setSwitchingDistance(cutoff - switch_width)
+       forces['NonbondedForce'].setUseDispersionCorrection(dispersion_correction)
 
        self.ndof = 3*system.getNumParticles() - 3*constrained
        self.system, self.positions = system, positions
 
 class FlexibleWaterBox(WaterBox):
    """
-   Create a flexible water box (TIP3P).
+   Flexible water box.
 
-   Examples
-   --------
-   
-   >>> waterbox = FlexibleWaterBox()
+   """
+
+   def __init__(self, *args, **kwargs):
+       """
+       Create a flexible water box.
+       
+       Parameters are inherited from WaterBox (except for 'constrained').
+              
+       Examples
+       --------
+       
+       Create a default flexible waterbox.
+       
+       >>> waterbox = FlexibleWaterBox()
+       >>> [system, positions] = [waterbox.system, waterbox.positions]
+       
+       """
+       super(FlexibleWaterBox, self).__init__(constrained=False, *args, **kwargs)
+
+class FourSiteWaterBox(WaterBox):
+   """
+   Four-site water box (TIP4P-Ew).
 
    """
 
    def __init__(self, *args, **kwargs):
        """
        Create a water box test systemm using a four-site water model (TIP4P-Ew).
-       
-       Parameters
-       ----------
-       
-       box_edge : simtk.unit.Quantity with units compatible with nanometers, optional, default = 2.5 nm
-          Edge length for cubic box [should be greater than 2*cutoff]
-       cutoff : simtk.unit.Quantity with units compatible with nanometers, optional, default = 0.9 nm
-          Nonbonded cutoff
-       
-       Examples
-       --------
-       
-       Create a default waterbox.
-       
-       >>> waterbox = FlexibleWaterBox()
-       >>> [system, positions] = [waterbox.system, waterbox.positions]
-       
-       """
-       super(FlexibleWaterBox, self).__init__(model='tip3p', constrained=False, *args, **kwargs)
+              
+       Parameters are inherited from WaterBox (except for 'model').
 
-class FourSiteWaterBox(WaterBox):
-   """
-   Create a water box test system using a four-site water model (TIP4P-Ew).
-
-   Examples
-   --------
-   
-   Create a default waterbox of four-site waters.
-
-   >>> waterbox = FourSiteWaterBox()
-
-   Control the cutoff.
-   
-   >>> waterbox = FourSiteWaterBox(box_edge=3.0*units.nanometers, cutoff=1.0*units.nanometers)
-
-   """
-
-   def __init__(self, box_edge=2.5*units.nanometers, cutoff=0.9*units.nanometers):
-       """
-       Create a water box test systemm using a four-site water model (TIP4P-Ew).
-       
-       Parameters
-       ----------
-       
-       box_edge : simtk.unit.Quantity with units compatible with nanometers, optional, default = 2.5 nm
-          Edge length for cubic box [should be greater than 2*cutoff]
-       cutoff : simtk.unit.Quantity with units compatible with nanometers, optional, default = 0.9 nm
-          Nonbonded cutoff
-       
        Examples
        --------
        
@@ -1843,36 +1829,19 @@ class FourSiteWaterBox(WaterBox):
        >>> waterbox = FourSiteWaterBox(box_edge=3.0*units.nanometers, cutoff=1.0*units.nanometers)
        
        """
-       super(FourSiteWaterBox, self).__init__(box_edge=box_edge, cutoff=cutoff, model='tip4pew')
+       super(FourSiteWaterBox, self).__init__(model='tip4pew', *args, **kwargs)
 
 class FiveSiteWaterBox(WaterBox):
    """
-   Create a water box test system using a four-site water model (TIP5P).
-
-   Examples
-   --------
-   
-   Create a default waterbox of five-site waters.
-
-   >>> waterbox = FiveSiteWaterBox()
-
-   Control the cutoff.
-   
-   >>> waterbox = FiveSiteWaterBox(box_edge=3.0*units.nanometers, cutoff=1.0*units.nanometers)
+   Five-site water box (TIP5P).
 
    """
 
-   def __init__(self, box_edge=2.5*units.nanometers, cutoff=0.9*units.nanometers):
+   def __init__(self, *args, **kwargs):
        """
        Create a water box test systemm using a five-site water model (TIP5P).
        
-       Parameters
-       ----------
-       
-       box_edge : simtk.unit.Quantity with units compatible with nanometers, optional, default = 2.5 nm
-          Edge length for cubic box [should be greater than 2*cutoff]
-       cutoff : simtk.unit.Quantity with units compatible with nanometers, optional, default = 0.9 nm
-          Nonbonded cutoff
+       Parameters are inherited from WaterBox (except for 'model').
        
        Examples
        --------
@@ -1887,22 +1856,11 @@ class FiveSiteWaterBox(WaterBox):
        >>> waterbox = FiveSiteWaterBox(box_edge=3.0*units.nanometers, cutoff=1.0*units.nanometers)
        
        """
-       super(FiveSiteWaterBox, self).__init__(box_edge=box_edge, cutoff=cutoff, model='tip5p')
+       super(FiveSiteWaterBox, self).__init__(model='tip5p', *args, **kwargs)
 
 class DischargedWaterBox(WaterBox):
    """
-   Create a water box test system with zeroed charges.
-
-   Examples
-   --------
-   
-   Create a default waterbox with zeroed charges
-
-   >>> waterbox = DischargedWaterBox()
-
-   Control the cutoff.
-   
-   >>> waterbox = DischargedWaterBox(box_edge=3.0*units.nanometers, cutoff=1.0*units.nanometers)
+   Water box test system with zeroed charges.
 
    """
 
@@ -1910,13 +1868,7 @@ class DischargedWaterBox(WaterBox):
        """
        Create a water box test systemm using a four-site water model (TIP4P-Ew).
        
-       Parameters
-       ----------
-       
-       box_edge : simtk.unit.Quantity with units compatible with nanometers, optional, default = 2.5 nm
-          Edge length for cubic box [should be greater than 2*cutoff]
-       cutoff : simtk.unit.Quantity with units compatible with nanometers, optional, default = 0.9 nm
-          Nonbonded cutoff
+       Parameters are inherited from WaterBox.
        
        Examples
        --------
@@ -1948,32 +1900,15 @@ class DischargedWaterBox(WaterBox):
 
 class DischargedWaterBoxHsites(WaterBox):
    """
-   Create a water box test system with zeroed charges and Lennard-Jones sites on hydrogens.
-
-   Examples
-   --------
-   
-   Create a default waterbox with zeroed charges
-
-   >>> waterbox = DischargedWaterBox()
-
-   Control the cutoff.
-   
-   >>> waterbox = DischargedWaterBox(box_edge=3.0*units.nanometers, cutoff=1.0*units.nanometers)
+   Water box test system with zeroed charges and Lennard-Jones sites on hydrogens.
 
    """
 
    def __init__(self, *args, **kwargs):
        """
-       Create a water box test systemm using a four-site water model (TIP4P-Ew).
+       Create a water box with zeroed charges and Lennard-Jones sites on hydrogens.
        
-       Parameters
-       ----------
-       
-       box_edge : simtk.unit.Quantity with units compatible with nanometers, optional, default = 2.5 nm
-          Edge length for cubic box [should be greater than 2*cutoff]
-       cutoff : simtk.unit.Quantity with units compatible with nanometers, optional, default = 0.9 nm
-          Nonbonded cutoff
+       Parameters are inherited from WaterBox.
        
        Examples
        --------
@@ -2487,12 +2422,4 @@ class AMOEBAProteinBox(TestSystem):
         positions = pdbfile.getPositions()
         
         self.system, self.positions = system, positions
-
-#
-# MAIN
-#
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
 
