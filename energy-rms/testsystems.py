@@ -1101,14 +1101,26 @@ class LennardJonesCluster(TestSystem):
 
     Parameters
     ----------
-    nx : int, optional, default=3
+    nx : int, optional, default=6
         number of particles in the x direction
-    ny : int, optional, default=3
+    ny : int, optional, default=6
         number of particles in the y direction
-    nz : int, optional, default=3
+    nz : int, optional, default=6
         number of particles in the z direction        
+    mass : simtk.unit.Quantity, optional, default=39.9 * units.amu
+        mass of each particle.
+    sigma : simtk.unit.Quantity, optional, default=3.4 * units.angstrom
+        Lennard-Jones sigma parameter
+    epsilon : simtk.unit.Quantity, optional, default=0.238 * units.kilocalories_per_mole
+        Lennard-Jones well depth
     K : simtk.unit.Quantity, optional, default=1.0 * units.kilojoules_per_mole/units.nanometer**2
         harmonic restraining potential
+    cutoff : simtk.unit.Quantity, optional, default=None
+        if specified, this cutoff is used
+    switch : bool, optional, default=True
+        flag to use nonbonded switching function (only active if cutoff is specified)
+    switch_width : simtk.unit.Quantity with units compatible with angstroms, optional, default=0.2*units.angstroms
+        switching function is turned on at cutoff - switch_width
 
     Examples
     --------
@@ -1118,18 +1130,32 @@ class LennardJonesCluster(TestSystem):
     >>> cluster = LennardJonesCluster()
     >>> system, positions = cluster.system, cluster.positions
 
-    Create default 3x3x3 Lennard-Jones cluster in a harmonic restraining potential.
+    Create 1000-atom Lennard-Jones cluster in a harmonic restraining potential.
 
     >>> cluster = LennardJonesCluster(nx=10, ny=10, nz=10)
     >>> system, positions = cluster.system, cluster.positions
-    """
-    def __init__(self, nx=3, ny=3, nz=3, K=1.0 * units.kilojoules_per_mole/units.nanometer**2):        
 
-        # Default parameters
-        mass_Ar     = 39.9 * units.amu
-        q_Ar        = 0.0 * units.elementary_charge
-        sigma_Ar    = 3.350 * units.angstrom
-        epsilon_Ar  = 0.001603 * units.kilojoule_per_mole
+    Create cluster with cutoff at 2*sigma and no switch
+    
+    >>> sigma = 3.4*units.angstrom
+    >>> cluster = LennardJonesCluster(sigma=sigma, cutoff=2*sigma, switch=False)
+    
+    Create cluster with cutoff at 2*sigma using switching function of width 0.5*sigma.
+    
+    >>> sigma = 3.4*units.angstrom
+    >>> cluster = LennardJonesCluster(sigma=sigma, cutoff=2*sigma, switch=True, switch_width=0.5*sigma)
+    
+    """
+    def __init__(self, nx=6, ny=6, nz=6, 
+                 mass=39.9 * units.amu, 
+                 sigma=3.4 * units.angstrom, 
+                 epsilon=0.238 * units.kilocalories_per_mole, 
+                 cutoff=None, 
+                 switch=False, 
+                 switch_width=0.5*units.angstrom,
+                 K=1.0 * units.kilojoules_per_mole/units.nanometer**2):        
+
+        charge = 0.0 * units.elementary_charge
 
         scaleStepSizeX = 1.0
         scaleStepSizeY = 1.0
@@ -1143,7 +1169,13 @@ class LennardJonesCluster(TestSystem):
 
         # Create a NonbondedForce object with no cutoff.
         nb = mm.NonbondedForce()
-        nb.setNonbondedMethod(mm.NonbondedForce.NoCutoff)
+        if cutoff:
+            nb.setNonbondedMethod(mm.NonbondedForce.CutoffPeriodic)
+            nb.setCutoffDistance(cutoff)
+            nb.setUseSwitchingFunction(switch)
+            nb.setSwitchingDistance(cutoff-switch_width)
+        else:
+            nb.setNonbondedMethod(mm.NonbondedForce.NoCutoff)
 
         positions = units.Quantity(np.zeros([natoms,3],np.float32), units.angstrom)
 
@@ -1151,11 +1183,11 @@ class LennardJonesCluster(TestSystem):
         for ii in range(nx):
             for jj in range(ny):
                 for kk in range(nz):
-                    system.addParticle(mass_Ar)
-                    nb.addParticle(q_Ar, sigma_Ar, epsilon_Ar)
-                    x = sigma_Ar*scaleStepSizeX*(ii - nx/2.0)
-                    y = sigma_Ar*scaleStepSizeY*(jj - ny/2.0)
-                    z = sigma_Ar*scaleStepSizeZ*(kk - nz/2.0)
+                    system.addParticle(mass)
+                    nb.addParticle(charge, sigma, epsilon)
+                    x = sigma*scaleStepSizeX*(ii - nx/2.0)
+                    y = sigma*scaleStepSizeY*(jj - ny/2.0)
+                    z = sigma*scaleStepSizeZ*(kk - nz/2.0)
 
                     positions[atom_index,0] = x
                     positions[atom_index,1] = y
@@ -1173,6 +1205,82 @@ class LennardJonesCluster(TestSystem):
         system.addForce(force)
 
         self.system, self.positions = system, positions
+
+class LennardJonesClusterCutoff(LennardJonesCluster):
+    """Create a non-periodic rectilinear grid of Lennard-Jones particles in a harmonic restraining potential using a cutoff.
+
+    Parameters
+    ----------
+    nx : int, optional, default=6
+        number of particles in the x direction
+    ny : int, optional, default=6
+        number of particles in the y direction
+    nz : int, optional, default=6
+        number of particles in the z direction        
+    mass : simtk.unit.Quantity, optional, default=39.9 * units.amu
+        mass of each particle.
+    sigma : simtk.unit.Quantity, optional, default=3.4 * units.angstrom
+        Lennard-Jones sigma parameter
+    epsilon : simtk.unit.Quantity, optional, default=0.238 * units.kilocalories_per_mole
+        Lennard-Jones well depth
+    K : simtk.unit.Quantity, optional, default=1.0 * units.kilojoules_per_mole/units.nanometer**2
+        harmonic restraining potential
+    cutoff : simtk.unit.Quantity, optional, default=2*3.4 * units.angstrom
+        if specified, this cutoff is used
+    switch : bool, optional, default=True
+        flag to use nonbonded switching function (only active if cutoff is specified)
+    switch_width : simtk.unit.Quantity with units compatible with angstroms, optional, default=0.2*units.angstroms
+        switching function is turned on at cutoff - switch_width
+
+    Examples
+    --------
+
+    Create Lennard-Jones cluster with default cutoff.
+    
+    >>> cluster = LennardJonesClusterCutoff()
+    >>> system, positions = cluster.system, cluster.positions
+    
+    """
+    def __init__(self, *args, **kwargs):
+       super(LennardJonesClusterCutoff, self).__init__(cutoff=2*3.4*units.angstroms, switch=False, *args, **kwargs)
+
+class LennardJonesClusterSwitch(LennardJonesCluster):
+    """Create a non-periodic rectilinear grid of Lennard-Jones particles in a harmonic restraining potential using a switch.
+
+    Parameters
+    ----------
+    nx : int, optional, default=6
+        number of particles in the x direction
+    ny : int, optional, default=6
+        number of particles in the y direction
+    nz : int, optional, default=6
+        number of particles in the z direction        
+    mass : simtk.unit.Quantity, optional, default=39.9 * units.amu
+        mass of each particle.
+    sigma : simtk.unit.Quantity, optional, default=3.4 * units.angstrom
+        Lennard-Jones sigma parameter
+    epsilon : simtk.unit.Quantity, optional, default=0.238 * units.kilocalories_per_mole
+        Lennard-Jones well depth
+    K : simtk.unit.Quantity, optional, default=1.0 * units.kilojoules_per_mole/units.nanometer**2
+        harmonic restraining potential
+    cutoff : simtk.unit.Quantity, optional, default=2*3.4 * units.angstrom
+        if specified, this cutoff is used
+    switch : bool, optional, default=True
+        flag to use nonbonded switching function (only active if cutoff is specified)
+    switch_width : simtk.unit.Quantity with units compatible with angstroms, optional, default=0.2*units.angstroms
+        switching function is turned on at cutoff - switch_width
+
+    Examples
+    --------
+
+    Create Lennard-Jones cluster with default cutoff and switch.
+    
+    >>> cluster = LennardJonesClusterSwitch()
+    >>> system, positions = cluster.system, cluster.positions
+    
+    """
+    def __init__(self, *args, **kwargs):
+       super(LennardJonesClusterSwitch, self).__init__(cutoff=2*3.4*units.angstroms, switch=True, switch_width=0.5*3.4*units.angstroms, *args, **kwargs)
 
 #=============================================================================================
 # Lennard-Jones fluid

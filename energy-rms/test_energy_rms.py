@@ -139,6 +139,7 @@ constraint_tolerances_to_try = [1.0e-10, 1.0e-5] # constraint tolerances to try 
 # Timesteps to try for each parameter set.
 timesteps_to_try = units.Quantity([0.125, 0.250, 0.5, 1.0], units.femtoseconds) # MD timesteps to test for each system
 ntimesteps_to_try = len(timesteps_to_try)
+platform_names_to_try = ['Reference'] # platform names to try
 
 # Number of GPUs.
 ngpus = 4
@@ -156,12 +157,8 @@ ghmc_timestep = 1.0 * units.femtoseconds
 nequil = 100 # number of NPT equilibration iterations
 
 # DEBUG
-#systems_to_try = ['LennardJonesFluid']
-#systems_to_try = ['WaterBox']
-#gammas_to_try = units.Quantity([0.01], units.picoseconds**-1) # collision rates
-#timestep_correction_flags_to_try = [False]
-#nequil = 3
-#precision_models_to_try = ['double'] # precision models to try
+systems_to_try = ['LennardJonesClusterCutoff', 'LennardJonesClusterSwitch', 'LennardJonesCluster', 'LennardJonesFluid']
+precision_models_to_try = ['double'] # precision models to try
 
 verbose = True
 
