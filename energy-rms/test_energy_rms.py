@@ -426,6 +426,9 @@ for index in range(rank, noptionsets, size):
         context.setPositions(positions)
         context.setVelocities(velocities) 
 
+        # Run integrator to eliminate any initial artifacts.
+        integrator.step(nsteps_per_record)
+
         total_energy_n = numpy.zeros([nrecords], numpy.float64)
 
         for record in range(nrecords):
