@@ -19,7 +19,6 @@ import doctest
 import time
 import numpy
 import os
-import os.path
 
 import simtk.unit as units
 import simtk.openmm as openmm
@@ -200,6 +199,12 @@ if rank == 0: print "There are %d option sets to try." % noptionsets
 # Equilibrate with GHMC using a barostat.
 #=============================================================================================
 
+# If the 'data' directory does not exist the tests bail out with a "Permission
+# Denied" error. It's a bit misleading... Make sure data/ is created
+try:
+    os.mkdir('data')
+except OSError:
+    pass
 nsystems = len(systems_to_try) * len(switching_to_try)
 for index in range(rank, nsystems, size):
 
