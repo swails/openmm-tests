@@ -177,7 +177,7 @@ try:
     from mpi4py import MPI # MPI wrapper
 except:
     print "mpi4py not available---using serial execution."
-    from fake_mpi import MPI
+    from repex import dummympi as MPI
     
 rank = MPI.COMM_WORLD.rank
 size = MPI.COMM_WORLD.size
