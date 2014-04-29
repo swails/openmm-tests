@@ -175,15 +175,13 @@ print "nrecords = %d" % nrecords
 
 try:
     from mpi4py import MPI # MPI wrapper
-    rank = MPI.COMM_WORLD.rank
-    size = MPI.COMM_WORLD.size
-    print "Node %d / %d" % (MPI.COMM_WORLD.rank, MPI.COMM_WORLD.size)
 except:
     print "mpi4py not available---using serial execution."
-    rank = 0
-    size = 1
+    from fake_mpi import MPI
     
-print "%d / %d" % (rank, size)
+rank = MPI.COMM_WORLD.rank
+size = MPI.COMM_WORLD.size
+print "Node %d / %d" % (MPI.COMM_WORLD.rank, MPI.COMM_WORLD.size)
 
 MPI.COMM_WORLD.barrier()
 
